@@ -90,12 +90,13 @@ loadclass=article
 
 function help {
    cat <<-EOF
-	This is $MYNAME version $VERSION
+	This is dtxgen version $VERSION
 
 	Usage: dtxgen [options] filename.[cls|sty]
 	
 	Options:
 	-h, --help      print this help and exit
+ 	-V              print this script's version and exit
 	-v, --version   print version and exit
 	-s, --short     short description; default: A new LaTeX package/class
 	-d, --date      date in yyyymmdd format; default: today ($date) 
@@ -121,27 +122,23 @@ function createfile {
    sed -n "/^<<'$2'/,/^$2/p" $0 |tail -n +2 |head -n -1 |sed "$1" >$FILE
 }
 
-if ! options=$(getopt -o s:n:m:c:d:hvqi \
-                      -l help,short:,name:,mail:,class:,date:,version,quiet,install -- "$@"); then exit 1; fi
+if ! options=$(getopt -o s:n:m:c:d:hvqI \
+                      -l help,short:,name:,mail:,class:,date:,version,quiet -- "$@"); then exit 1; fi
 eval set -- "$options"
 
 while [ $# -gt 0 ]; do
    case $1 in
-   -h|--help)     help;          exit 0;;
-   -v|--version)  echo $VERSION; exit 0;;
-   -s|--short)    short=$2;     shift 2;;
-   -d|--date)     date=$2;      shift 2;;
-   -m|--mail)     mail=$2;      shift 2;;
-   -n|--name) 	  name=$2;      shift 2;;
-   -c|--class)    loadclass=$2; shift 2;;
-   -q|--quiet)    quiet=--quiet;shift;;
-   -i|--install)  createfile "s/%VERSION%/$VERSION/" README
-                  ltxdoc2pdf $MYNAME
-                  zip $MYNAME-$VERSION.zip README $MYNAME $MYNAME.pdf
-                  exit 0
-                  ;;
-   (--)           shift;        break;;
-   (*)            break;;
+   -h|--help)    help;               exit 0;;
+   -v|--version) echo $VERSION;      exit 0;;
+   -s|--short)   short=$2;          shift 2;;
+   -d|--date)    date=$2;           shift 2;;
+   -m|--mail)    mail=$2;           shift 2;;
+   -n|--name) 	 name=$2;           shift 2;;
+   -c|--class)   loadclass=$2;      shift 2;;
+   -q|--quiet)   quiet=--quiet;       shift;;
+   -I)           instscript $MYNAME; exit 0;; # not for general use
+   (--)          shift;               break;;
+   (*)           break;;
    esac
 done
 
