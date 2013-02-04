@@ -389,6 +389,30 @@ Running make install installs the files in the local TeX tree.
 }{%
 %    \end{macrocode}
 % \changes{v1.00a}{%date%}{Added a spurious change log entry to
+----------------------------------------------------------------
+dtxgen --- A new LaTeX package
+Version: 1.00
+Author:  Wybo Dekker
+E-mail:  wybo@xs4all.nl
+License: Released under the GNU General Public License
+See:     http://www.gnu.org/copyleft/gpl.html
+----------------------------------------------------------------
+
+Short description:
+dtxgen creates a template for a self-extracting .dtx file. Useful when you
+a new .dtx file.
+
+The script takes some variables such as:
+- name and email address of the author,
+- a short description of the class or package generated from the .dtx file,
+- a date
+from environment variables, or from command line options and generates a
+template for the .dtx file with some minimal examples. Of course, the user
+will have to replace those examples with the real work. Also, a
+Makefile is generated, which can compile the .dtx file and prepare a
+CTAN-ready zip file.
+
+Major changes of release 1.00 relative to (this is the first release)
 %   show what a change \emph{within} an environment definition looks
 %   like.}
 % Don't use |%| to introduce a code comment within a |macrocode|
