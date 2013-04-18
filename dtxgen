@@ -81,7 +81,7 @@ zip       & produce a zip file ready for upload to CTAN
 
 LATEX
 
-VERSION=1.01
+VERSION=1.02
 MYNAME=`basename $0`
 
 function help {
@@ -119,8 +119,10 @@ function createfile {
 
 test ${BASH_VERSINFO[0]} -ge 4 ||
   die Your bash has version $BASH_VERSION, but it should be at least version 4
-type sed >&/dev/null ||
-  die dtxgen needs sed, but sed is not in your PATH
+for i in sed getopt; do
+  type $i >&/dev/null ||
+    die dtxgen needs sed and getopt, but $i is not in your PATH
+done
 
 if ! options=$(getopt -o s:n:m:c:d:hvqI \
                       -l help,short:,name:,mail:,class:,date:,version,quiet -- "$@"); then exit 1; fi
