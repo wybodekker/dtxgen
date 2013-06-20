@@ -35,7 +35,7 @@ Set the initial version's date. By default, the current date will be used.
 The date should be entered in the |yyyymmdd| format, although it will be
 stored the LaTeX way: |yyyy/mm/dd|.\\
 
-|-V, --version|&
+|-v, --version|&
 Prints the script's version and exits.\\
 
 |-h, --help|&
@@ -283,9 +283,9 @@ This work is "maintained" (as per LPPL maintenance status) by
 %name%.
 
 This work consists of the file %base%.dtx and a Makefile.
-Running make generates the derived files README.txt, %base%.pdf and %base%.%ext%.
-Running make inst installs the files in the user's TeX tree.
-Running make install installs the files in the local TeX tree.
+Running "make" generates the derived files README, %base%.pdf and %base%.%ext%.
+Running "make inst" installs the files in the user's TeX tree.
+Running "make install" installs the files in the local TeX tree.
 
 \endpostamble
 
