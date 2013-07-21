@@ -444,5 +444,3 @@ Major changes of release %VERSION% relative to 1.00:
 - dtx files contain only one version number
 - presence of sed executable is tested
 README
-
-# $Id$
