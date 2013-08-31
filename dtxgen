@@ -1,54 +1,38 @@
 #!/bin/bash
-<<'LATEX'
-== dtxgen - generate template for LaTeX self-extracting .dtx file
+<<'DOC'
+= dtxgen - generate template for LaTeX self-extracting .dtx file
 
-== Usage 
-
+= Usage 
   dtxgen [options] basename.[sty|cls]
 
-== Options
+= Options
+dtxgen recognizes the following options:
 
-\B{dtxgen} recognizes the following options:
+-s,--short=...	A short, one-liner, description for the class or package.
+	By default, the string `A new LaTeX class' or `A new LaTeX package'
+	will be used.
+-n,--name=...	Your name (first name, followed by surname). Alternatively,
+	you can set a default value in the environment variable |NAME|;
+	if you do so and still use this option, the option's value wills
+	have priority.
+-m,--mail=...	Your email address. Alternatively, you can set a default value ins
+	the environment variable |EMAIL|; if you do so and still use this
+	option, the option's value will have priority.
+-c,--class=...	For class templates only: inserts a |\LoadClass{...}|, so that the
+	new class will start with the properties of the |...| class.
+	The default is |article|.
+-d,--date=...	Set the initial version's date. By default, the current date will
+	be used.  The date should be entered in the |yyyymmdd| format,
+	although it will be stored the LaTeX way: |yyyy/mm/dd|.
+-v,--version	Prints the script's version and exits. 
+-h,--help	Prints help information and exits.
 
-\tabtx
-|-s, --short=...|&
-A short, one-liner, description for the class or package. By default, the
-string `A new LaTeX class' or `A new LaTeX package' will be used.\\
-
-|-n, --name=...|&
-Your name (first name, followed by surname). Alternatively, you can set a
-default value in the environment variable |NAME|; if you do so and still
-use this option, the option's value will have priority.\\
-
-|-m, --mail=...|&
-Your email address. Alternatively, you can set a default value in the
-environment variable |EMAIL|; if you do so and still use this option, the
-option's value will have priority.\\
-
-|-c, --class=...|&
-For class templates only: inserts a |\LoadClass{...}|, so that the new
-class will start with the properties of the \F{...} class. The default is
-\F{article}.\\
-
-|-d, --date=...|&
-Set the initial version's date. By default, the current date will be used.
-The date should be entered in the |yyyymmdd| format, although it will be
-stored the LaTeX way: |yyyy/mm/dd|.\\
-
-|-v, --version|&
-Prints the script's version and exits.\\
-
-|-h, --help|&
-Prints help information and exits.\\
-\end{tabularx}
-
-== Description
-
+= Description
 This script is based on the self-extracting model dtx file described by
-Joseph Wright, see\\\url{http://www.texdev.net/2009/10/06/a-model-dtx-file/}.
+U{http://www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}.
 
-You can use \B{dtxgen} when you decide to create a new LaTeX class or style. 
-For example, when you decide to make a class named \S{myclass}, you could run:
+You can use dtxgen when you decide to create a new LaTeX class or style. 
+For example, when you decide to make a class named |myclass|, you could run:
 
   dtxgen -n 'your name' -m 'your@email.ad' myclass.cls
 
@@ -57,8 +41,8 @@ NAME and EMAIL, you could simply type:
 
   dtxgen myclass.cls
 
-and you would end up with five files: \F{myclass.dtx}, \F{myclass.cls}, 
-\F{myclass.pdf}, \F{README}, and \F{Makefile}.
+and you would end up with five files: |myclass.dtx|, |myclass.cls|, 
+|myclass.pdf|, |README|, and |Makefile|.
 
 The resulting .dtx file is a template file in which some minimal example
 content will have to be replaced with real content, but the dates,
@@ -66,20 +50,18 @@ basename, author's name and email address are already in place and,
 depending on whether you use used a .cls or a .sty extension in the
 argument, it is formatted to be either a class or a package source file.
 
-== Makefile
+= Makefile
+The |Makefile| can be used to compile new versions of your work; it contains the following targets:
 
-The \F{Makefile} can be used to compile new versions of your work; it contains the following targets:
-
-\tabtx
-all       & (the default) generate the style or class file, the pdf-documentation, and a README file.\\
-distclean & remove all files that can be regenerated,\\
-clean     & same, except the style or class file, the pdf-documentation, and a README file.\\
-inst      & install in the user's TeX tree,\\
-install   & install in the local TeX tree (uses sudo)\\
-zip       & produce a zip file ready for upload to CTAN
-\end{tabularx}
-
-LATEX
+all	(the default) generate the style or class file, the pdf-documentation,
+	and a README file.
+distclean	remove all files that can be regenerated,
+clean	same, except the style or class file, the pdf-documentation,
+	and a README file.
+inst	install in the user's TeX tree,
+install	install in the local TeX tree (uses sudo)
+zip	produce a zip file ready for upload to CTAN
+DOC
 
 VERSION=1.03
 MYNAME=`basename $0`
@@ -444,3 +426,4 @@ Major changes of release %VERSION% relative to 1.00:
 - dtx files contain only one version number
 - presence of sed executable is tested
 README
+# vim: ts=20
