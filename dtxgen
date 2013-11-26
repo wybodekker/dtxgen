@@ -2,30 +2,39 @@
 <<'DOC'
 = dtxgen - generate template for LaTeX self-extracting .dtx file
 
-= Usage 
+= Synopsis
   dtxgen [options] basename.[sty|cls]
 
-= Options
+Options
 dtxgen recognizes the following options:
 
--s,--short=...	A short, one-liner, description for the class or package.
+-s,--short=...	
+	A short, one-liner, description for the class or package.
 	By default, the string `A new LaTeX class' or `A new LaTeX package'
 	will be used.
--n,--name=...	Your name (first name, followed by surname). Alternatively,
+-n,--name=...	
+	Your name (first name, followed by surname). Alternatively,
 	you can set a default value in the environment variable |NAME|;
 	if you do so and still use this option, the option's value wills
 	have priority.
--m,--mail=...	Your email address. Alternatively, you can set a default value ins
+-m,--mail=...	
+	Your email address. Alternatively, you can set a default value ins
 	the environment variable |EMAIL|; if you do so and still use this
 	option, the option's value will have priority.
--c,--class=...	For class templates only: inserts a |\LoadClass{...}|, so that the
+-c,--class=...	
+	For class templates only: inserts a |\LoadClass{...}|, so that the
 	new class will start with the properties of the |...| class.
 	The default is |article|.
--d,--date=...	Set the initial version's date. By default, the current date will
+-d,--date=...	
+	Set the initial version's date. By default, the current date will
 	be used.  The date should be entered in the |yyyymmdd| format,
 	although it will be stored the LaTeX way: |yyyy/mm/dd|.
--v,--version	Prints the script's version and exits. 
--h,--help	Prints help information and exits.
+-q,--quiet	
+	Run quietly
+-v,--version	
+	Prints the script's version and exits. 
+-h,--help	
+	Prints help information and exits.
 
 = Description
 This script is based on the self-extracting model dtx file described by
@@ -53,46 +62,28 @@ argument, it is formatted to be either a class or a package source file.
 = Makefile
 The |Makefile| can be used to compile new versions of your work; it contains the following targets:
 
-all	(the default) generate the style or class file, the pdf-documentation,
-	and a README file.
+all		(the default) generate the style or class file, the pdf-documentation,
+		and a README file.
 distclean	remove all files that can be regenerated,
-clean	same, except the style or class file, the pdf-documentation,
-	and a README file.
-inst	install in the user's TeX tree,
-install	install in the local TeX tree (uses sudo)
-zip	produce a zip file ready for upload to CTAN
+clean		same, except the style or class file, the pdf-documentation,
+		and a README file.
+inst		install in the user's TeX tree,
+install		install in the local TeX tree (uses sudo)
+zip		produce a zip file ready for upload to CTAN
 
-= Author
-Copyright (C) 2009 Wybo Dekker (U{mailto:wybo@dekkerdocumenten.nl}{mail})
-
-This program is free software: you can redistribute it and/or modify it under
-the terms of the U{http://www.gnu.org/licenses/}{GNU General Public License} as
-published by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version. It is distributed in the hope that it will
-be useful, but without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+= Author and copy right
+Author	Wybo Dekker
+Email	U{Wybo@dekkerdocumenten.nl}{wybo@dekkerdocumenten.nl}
+License	Released under the U{http://www.gnu.org/copyleft/gpl.html}{GNU General Public License}
 DOC
 
 VERSION=1.03
 MYNAME=`basename $0`
 
-function help {
-   cat <<-EOF
-	This is dtxgen version $VERSION
-
-	Usage: dtxgen [options] filename.[cls|sty]
-	
-	Options:
-	-h, --help      print this help and exit
-	-v, --version   print version and exit
-	-s, --short     short description; default: A new LaTeX package/class
-	-d, --date      date in yyyymmdd format; default: today (`date +%Y%m%d`) 
-	-n, --name      author's name; default: \$NAME (${NAME:-(not set)})
-	-m, --mail      author's email address; default: \$EMAIL (${EMAIL:-(not set)})
-	-c, --class     for class files: the class to be \\LoadClass\'d; default: article
-	-q, --quiet	be quiet
-	EOF
-}
+    die() { echo "$@"; exit 1; }
+   help() { sed -n '/^= \(Usage\|Synopsis\)/,/^= /p' $0|sed '1s/.*/Usage:/;/^= /d'; exit 0; }
+helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'; exit 0; }
+version() { echo $VERSION; exit 0; }
 
 # print error message, remove temporary files, and exit
 function die {
@@ -116,18 +107,19 @@ for i in sed getopt; do
     die dtxgen needs sed and getopt, but $i is not in your PATH
 done
 
-if ! options=$(getopt -o s:n:m:c:d:hvqI \
-                      -l help,short:,name:,mail:,class:,date:,version,quiet -- "$@"); then exit 1; fi
+if ! options=$(getopt -o s:n:m:c:d:hHvqI \
+                      -l short:,name:,mail:,class:,date:,help,Help,version,quiet -- "$@"); then exit 1; fi
 eval set -- "$options"
 
 while [ $# -gt 0 ]; do
    case $1 in
-   -h|--help)    help;               exit 0;;
-   -v|--version) echo $VERSION;      exit 0;;
+   -h|--help)    help;;
+   -H|--Help)    helpall;;	
+   -v|--version) version;;
    -s|--short)   short=$2;          shift 2;;
    -d|--date)    date=$2;           shift 2;;
    -m|--mail)    mail=$2;           shift 2;;
-   -n|--name) 	 name=$2;           shift 2;;
+   -n|--name)    name=$2;           shift 2;;
    -c|--class)   loadclass=$2;      shift 2;;
    -q|--quiet)   quiet=--quiet;       shift;;
    -I)           instscript $MYNAME; exit 0;; # not for general use
@@ -436,4 +428,3 @@ Major changes of release %VERSION% relative to 1.00:
 - dtx files contain only one version number
 - presence of sed executable is tested
 README
-# vim: ts=20
