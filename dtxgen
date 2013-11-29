@@ -39,6 +39,9 @@ dtxgen recognizes the following options:
 	Prints the script's version and exits. 
 -h,--help	
 	Prints help information and exits.
+-H,--Help	
+	print full documentation via less and exit
+
 
 = Description
 This script is based on the self-extracting model dtx file described by
@@ -85,6 +88,7 @@ DOC
    help() { sed -n '/^= Synopsis/,/^= /p' $0|sed '1s/.*/Usage:/;/^= /d'; exit; }
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
 version() { echo $VERSION; exit; }
+install() { which instscript>&/dev/null && instscript $MYNAME; exit; }
 test ${BASH_VERSINFO[0]} -ge 4 || die "Need bash version >= 4 (you have $BASH_VERSION)"
 
 # using the label in arg 2, read template from my self, filter it
@@ -105,13 +109,13 @@ while [ $# -gt 0 ]; do
    -h|--help)    help;;
    -H|--Help)    helpall;;	
    -V|--version) version;;
+   -I)           install;;
    -s|--short)   short=$2;          shift 2;;
    -d|--date)    date=$2;           shift 2;;
    -m|--mail)    mail=$2;           shift 2;;
    -n|--name)    name=$2;           shift 2;;
    -c|--class)   loadclass=$2;      shift 2;;
    -q|--quiet)   quiet=--quiet;       shift;;
-   -I)           instscript $MYNAME;   exit;; # not for general use
    (--)          shift;               break;;
    (*)           break;;
    esac
