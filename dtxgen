@@ -1,4 +1,8 @@
 #!/bin/bash
+test ${BASH_VERSION%%\.*} -ge 4 || {
+   echo "Need bash version >=4 (you have $BASH_VERSION)"
+   exit 1
+}
 
 version=1.03
 myname=$(basename $0)
@@ -89,7 +93,6 @@ DOC
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
 version() { echo $version; exit; }
 install() { which instscript>&/dev/null && instscript $myname; exit; }
-test ${BASH_VERSINFO[0]} -ge 4 || die "Need bash version >= 4 (you have $BASH_VERSION)"
 
 # using the label in arg 2, read template from my self, filter it
 # throught the script in arg 1, and write the output to the file in arg 3.
