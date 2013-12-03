@@ -1,7 +1,7 @@
 #!/bin/bash
 
-VERSION=1.03
-MYNAME=$(basename $0)
+version=1.03
+myname=$(basename $0)
 
 <<'DOC'
 = dtxgen - generate template for LaTeX self-extracting .dtx file
@@ -14,7 +14,7 @@ dtxgen recognizes the following options:
 
 -s,--short=...	
 	A short, one-liner, description for the class or package.
-	By default, the string `A new LaTeX class' or `A new LaTeX package'
+	By default, the string /A new LaTeX class/ or /A new LaTeX package/
 	will be used.
 -n,--name=...	
 	Your name (first name, followed by surname). Alternatively,
@@ -87,17 +87,17 @@ DOC
     die() { echo -e "$@"; exit 1; }
    help() { sed -n '/^= Synopsis/,/^= /p' $0|sed '1s/.*/Usage:/;/^= /d'; exit; }
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
-version() { echo $VERSION; exit; }
-install() { which instscript>&/dev/null && instscript $MYNAME; exit; }
+version() { echo $version; exit; }
+install() { which instscript>&/dev/null && instscript $myname; exit; }
 test ${BASH_VERSINFO[0]} -ge 4 || die "Need bash version >= 4 (you have $BASH_VERSION)"
 
 # using the label in arg 2, read template from my self, filter it
 # throught the script in arg 1, and write the output to the file in arg 3.
 # The default for arg 3 is arg 2
 function createfile {
-   FILE=$3
-   test "$FILE" = "" && FILE=$2
-   sed -n "/^<<'$2'/,/^$2/p" $0 |tail -n +2 |head -n -1 |sed "$1" >$FILE
+   file=$3
+   test "$file" = "" && file=$2
+   sed -n "/^<<'$2'/,/^$2/p" $0 |tail -n +2 |head -n -1 |sed "$1" >$file
 }
 
 if ! options=$(getopt -o s:n:m:c:d:hHVqI \
@@ -123,16 +123,16 @@ done
 
 name=${name:-${NAME:-(not set)}}
 mail=${mail:-${EMAIL:-(not set)}}
-date=${date:-`date +%Y%m%d`}
+date=${date:-$(date +%Y%m%d)}
 year=${date:0:4}
 loadclass=${loadclass:-article}
 
 # date must be 8 digits; insert the two /'s:
 if [[ ! $date =~ ^[[:digit:]]{8}$ ]]; then die illegal date; fi
-date=`sed 's/\(....\)\(..\)\(..\)/\1\\\\\/\2\\\\\/\3/' <<<$date`
+date=$(sed 's/\(....\)\(..\)\(..\)/\1\\\\\/\2\\\\\/\3/' <<<$date)
 
 # argument must have .clls or .sty extension:
-read base ext <<<`echo $1 |sed  's/\./ /'`
+read base ext <<<$(echo $1 |sed  's/\./ /')
 
 case "$ext" in
 cls) typ=class; Typ=Class;
@@ -150,10 +150,10 @@ esac
 # The short description may contain TeX commands, but then we need 
 # a version without them at some places; note that this removes only 
 # simple contructs:
-shrt=`sed 's/\\\\[[:alpha:]]\\+{\\([^}]*\\)}/\\1/g;s/\\\\//g' <<<$short`
+shrt=$(sed 's/\\\\[[:alpha:]]\\+{\\([^}]*\\)}/\\1/g;s/\\\\//g' <<<$short)
 
 # Any \'s in the short description need to be duplicated for the script:
-short=`sed 's/\\\\/\\\\\\\\/g' <<<$short`
+short=$(sed 's/\\\\/\\\\\\\\/g' <<<$short)
 
 test -z "$mail" && die "author's email not set - use option or environment variable EMAIL"
 test -z "$name" && die "author's name not set - use option or environment variable NAME"
@@ -395,7 +395,7 @@ DTX
 <<'README'
 ----------------------------------------------------------------
 dtxgen --- generate template for LaTeX self-extracting .dtx file
-Version: %VERSION%
+Version: %version%
 Author:  Wybo Dekker
 E-mail:  wybo@xs4all.nl
 License: Released under the GNU General Public License
@@ -417,7 +417,7 @@ from environment variables, or from command line options and generates a
 template for the .dtx file with some minimal examples. Of course, the user
 will have to replace those examples with the real work.
 
-Major changes of release %VERSION% relative to 1.00:
+Major changes of release %version% relative to 1.00:
 - dtx files contain only one version number
 - presence of sed executable is tested
 README
