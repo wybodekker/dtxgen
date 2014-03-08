@@ -88,11 +88,13 @@ Email	U{Wybo@dekkerdocumenten.nl}{wybo@dekkerdocumenten.nl}
 License	Released under the U{http://www.gnu.org/copyleft/gpl.html}{GNU General Public License}
 DOC
 
-    die() { echo -e "$@"; exit 1; }
+    die() { echo -e "$myname: $Err$@$Nor" 1>&2; exit 1; }
    help() { sed -n '/^= Synopsis/,/^= /p' $0|sed '1s/.*/Usage:/;/^= /d'; exit; }
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
 version() { echo $version; exit; }
 install() { which instscript>&/dev/null && instscript $myname; exit; }
+Nor='\e[0m'    # reset color	]
+Err='\e[31;1m' # light red	]
 
 # using the label in arg 2, read template from my self, filter it
 # throught the script in arg 1, and write the output to the file in arg 3.
@@ -109,16 +111,16 @@ eval set -- "$options"
 
 while [ $# -gt 0 ]; do
    case $1 in
-   -h|--help)    help;;
-   -H|--Help)    helpall;;	
-   -V|--version) version;;
-   -I)           install;;
-   -s|--short)   short=$2;          shift 2;;
-   -d|--date)    date=$2;           shift 2;;
-   -m|--mail)    mail=$2;           shift 2;;
-   -n|--name)    name=$2;           shift 2;;
-   -c|--class)   loadclass=$2;      shift 2;;
-   -q|--quiet)   quiet=--quiet;       shift;;
+   (-h|--help)    help;;
+   (-H|--Help)    helpall;;	
+   (-V|--version) version;;
+   (-I)           install;;
+   (-s|--short)   short=$2;          shift 2;;
+   (-d|--date)    date=$2;           shift 2;;
+   (-m|--mail)    mail=$2;           shift 2;;
+   (-n|--name)    name=$2;           shift 2;;
+   (-c|--class)   loadclass=$2;      shift 2;;
+   (-q|--quiet)   quiet=--quiet;       shift;;
    (--)          shift;               break;;
    (*)           break;;
    esac
@@ -138,15 +140,15 @@ date=$(sed 's/\(....\)\(..\)\(..\)/\1\\\\\/\2\\\\\/\3/' <<<$date)
 read base ext <<<$(echo $1 |sed  's/\./ /')
 
 case "$ext" in
-cls) typ=class; Typ=Class;
+(cls) typ=class; Typ=Class;
      short=${short:-A new LaTeX class}
      lcl='\\LoadClass[a4paper,fleqn]{'"$loadclass}"
      ;;
-sty) typ=package; Typ=Package;
+(sty) typ=package; Typ=Package;
      short=${short:-A new LaTeX package}
      use='\\usepackage{\\jobname}'
      ;;
-*)   die "The argument must have .cls or .sty extension
+(*)   die "The argument must have .cls or .sty extension
          (try the --help option)"
 esac
 
