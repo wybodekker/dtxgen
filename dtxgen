@@ -105,8 +105,11 @@ function createfile {
    sed -n "/^<<'$2'/,/^$2/p" $0 |tail -n +2 |head -n -1 |sed "$1" >$file
 }
 
-if ! options=$(getopt -o s:n:m:c:d:hHVqI \
-                      -l short:,name:,mail:,class:,date:,help,Help,version,quiet -- "$@"); then exit 1; fi
+if ! options=$(getopt \
+   -n $myname \
+   -o s:n:m:c:d:hHVqI \
+   -l short:,name:,mail:,class:,date:,help,Help,version,quiet -- "$@"
+); then exit 1; fi
 eval set -- "$options"
 
 while [ $# -gt 0 ]; do
