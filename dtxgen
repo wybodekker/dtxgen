@@ -4,7 +4,7 @@ test ${BASH_VERSION%%\.*} -ge 4 || {
    exit 1
 }
 
-version=1.03
+version=1.04
 myname=$(basename $0)
 
 <<'DOC'
@@ -13,7 +13,36 @@ myname=$(basename $0)
 = Synopsis
   dtxgen [options] basename.[sty|cls]
 
-Options
+= Description
+dtxgen creates a template for a self-extracting .dtx file, based on the model described by
+U{http://www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}. It is useful for
+those who plan to create a new Documented LaTeX Source (.dtx) file. 
+
+Usage example:
+  
+  dtxgen -n 'your name' -m 'your@email.ad' myclass.cls
+
+The script takes some variables such as:
+- name and email address of the author,
+- a short description of the class or package generated from the .dtx file,
+- a date
+from environment variables, or from command line options and generates,
+among more, a template for the .dtx file with some minimal examples. Of
+course, the user will have to replace those examples with the real work,
+but the dates, basename, author's name and email address are already in
+place and, depending on whether you use used a .cls or a .sty extension
+in the argument, it is formatted to be either a class or a package
+source file.
+
+If you have an environment with your name and email address defined in
+NAME and EMAIL, you could simply type:
+
+  dtxgen myclass.cls
+
+and you would end up with five files: |myclass.dtx|, |myclass.cls|, 
+|myclass.pdf|, |README|, and |Makefile|.
+
+= Options
 dtxgen recognizes the following options:
 
 -s,--short=...	
@@ -46,30 +75,6 @@ dtxgen recognizes the following options:
 -H,--Help	
 	print full documentation via less and exit
 
-
-= Description
-This script is based on the self-extracting model dtx file described by
-U{http://www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}.
-
-You can use dtxgen when you decide to create a new LaTeX class or style. 
-For example, when you decide to make a class named |myclass|, you could run:
-
-  dtxgen -n 'your name' -m 'your@email.ad' myclass.cls
-
-or, if you have an environment with your name and email address defined in
-NAME and EMAIL, you could simply type:
-
-  dtxgen myclass.cls
-
-and you would end up with five files: |myclass.dtx|, |myclass.cls|, 
-|myclass.pdf|, |README|, and |Makefile|.
-
-The resulting .dtx file is a template file in which some minimal example
-content will have to be replaced with real content, but the dates,
-basename, author's name and email address are already in place and,
-depending on whether you use used a .cls or a .sty extension in the
-argument, it is formatted to be either a class or a package source file.
-
 = Makefile
 The |Makefile| can be used to compile new versions of your work; it contains the following targets:
 
@@ -82,6 +87,11 @@ inst		install in the user's TeX tree,
 install		install in the local TeX tree (uses sudo)
 zip		produce a zip file ready for upload to CTAN
 
+= Changes
+Changes with respect version 1.03: 
+- Clearer comments
+- scripts' README information incorporated in the documentation.
+
 = Author and copyright
 Author	Wybo Dekker
 Email	U{Wybo@dekkerdocumenten.nl}{wybo@dekkerdocumenten.nl}
@@ -92,12 +102,12 @@ DOC
    help() { sed -n '/^= Synopsis/,/^= /p' $0|sed '1s/.*/Usage:/;/^= /d'; exit; }
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
 version() { echo $version; exit; }
-install() { which instscript>&/dev/null && instscript $myname; exit; }
+install() { which instscript>&/dev/null && instscript -zp $myname; exit; }
 Nor='\e[0m'    # reset color	]
 Err='\e[31;1m' # light red	]
 
 # using the label in arg 2, read template from my self, filter it
-# throught the script in arg 1, and write the output to the file in arg 3.
+# through the script in arg 1, and write the output to the file in arg 3.
 # The default for arg 3 is arg 2
 function createfile {
    file=$3
@@ -137,7 +147,7 @@ loadclass=${loadclass:-article}
 
 # date must be 8 digits; insert the two /'s:
 if [[ ! $date =~ ^[[:digit:]]{8}$ ]]; then die illegal date; fi
-date=$(sed 's/\(....\)\(..\)\(..\)/\1\\\\\/\2\\\\\/\3/' <<<$date)
+date=$(sed 's/\(....\)\(..\)\(..\)/\1\\\/\2\\\/\3/' <<<$date)
 
 # argument must have .clls or .sty extension:
 read base ext <<<$(echo $1 |sed  's/\./ /')
@@ -158,10 +168,10 @@ esac
 # The short description may contain TeX commands, but then we need 
 # a version without them at some places; note that this removes only 
 # simple contructs:
-shrt=$(sed 's/\\\\[[:alpha:]]\\+{\\([^}]*\\)}/\\1/g;s/\\\\//g' <<<$short)
+shrt=$(sed 's/\\[[:alpha:]]\\+{\\([^}]*\\)}/\\1/g;s/\\//g' <<<$short)
 
 # Any \'s in the short description need to be duplicated for the script:
-short=$(sed 's/\\\\/\\\\\\\\/g' <<<$short)
+short=$(sed 's/\\/\\\\/g' <<<$short)
 
 test -z "$mail" && die "author's email not set - use option or environment variable EMAIL"
 test -z "$name" && die "author's name not set - use option or environment variable NAME"
@@ -399,33 +409,3 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 %\Finale
 DTX
-
-<<'README'
-----------------------------------------------------------------
-dtxgen --- generate template for LaTeX self-extracting .dtx file
-Version: %version%
-Author:  Wybo Dekker
-E-mail:  wybo@xs4all.nl
-License: Released under the GNU General Public License
-See:     http://www.gnu.org/copyleft/gpl.html
-----------------------------------------------------------------
-
-Short description:
-dtxgen creates a template for a self-extracting .dtx file. It is useful for
-those who plan to create a new Documented LaTeX Source (.dtx) file. 
-Usage example:
-
-  dtxgen -n 'your name' -m 'your@email.ad' myclass.cls
-
-The script takes some variables such as:
-- name and email address of the author,
-- a short description of the class or package generated from the .dtx file,
-- a date
-from environment variables, or from command line options and generates a
-template for the .dtx file with some minimal examples. Of course, the user
-will have to replace those examples with the real work.
-
-Major changes of release %version% relative to 1.00:
-- dtx files contain only one version number
-- presence of sed executable is tested
-README
