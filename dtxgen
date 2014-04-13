@@ -1,8 +1,4 @@
 #!/bin/bash
-test ${BASH_VERSION%%\.*} -ge 4 || {
-   echo "Need bash version >=4 (you have $BASH_VERSION)"
-   exit 1
-}
 
 version=1.04
 myname=$(basename $0)
@@ -11,11 +7,11 @@ myname=$(basename $0)
 = dtxgen - generate template for LaTeX self-extracting .dtx file
 
 = Synopsis
-  dtxgen [options] basename.[sty|cls]
+dtxgen [options] basename.[sty|cls]	
 
 = Description
 dtxgen creates a template for a self-extracting .dtx file, based on the model described by
-U{http://www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}. It is useful for
+U{www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}. It is useful for
 those who plan to create a new Documented LaTeX Source (.dtx) file. 
 
 Usage example:
@@ -95,7 +91,7 @@ Changes with respect version 1.03:
 = Author and copyright
 Author	Wybo Dekker
 Email	U{Wybo@dekkerdocumenten.nl}{wybo@dekkerdocumenten.nl}
-License	Released under the U{http://www.gnu.org/copyleft/gpl.html}{GNU General Public License}
+License	Released under the U{www.gnu.org/copyleft/gpl.html}{GNU General Public License}
 DOC
 
     die() { echo -e "$myname: $Err$@$Nor" 1>&2; exit 1; }
@@ -103,8 +99,10 @@ DOC
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
 version() { echo $version; exit; }
 install() { which instscript>&/dev/null && instscript -zp $myname; exit; }
+
 Nor='\e[0m'    # reset color	]
 Err='\e[31;1m' # light red	]
+test ${BASH_VERSINFO[0]} -ge 4 || die "Need bash version >= 4 (you have $BASH_VERSION)"
 
 # using the label in arg 2, read template from my self, filter it
 # through the script in arg 1, and write the output to the file in arg 3.
