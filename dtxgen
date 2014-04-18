@@ -7,7 +7,7 @@ myname=$(basename $0)
 = dtxgen - generate template for LaTeX self-extracting .dtx file
 
 = Synopsis
-dtxgen [options] basename.[sty|cls]	
+dtxgen [options] basename.[sty,cls]	
 
 = Description
 dtxgen creates a template for a self-extracting .dtx file, based on the model described by
