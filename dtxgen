@@ -98,7 +98,7 @@ DOC
    help() { sed -n '/^= Synopsis/,/^= /p' $0|sed '1s/.*/Usage:/;/^= /d'; exit; }
 helpall() { sed -n '/^<<.DOC.$/,/^DOC$/p' $0|sed -n '1d;$d;p'|less; exit; }
 version() { echo $version; exit; }
-install() { which instscript>&/dev/null && instscript -zp $myname; exit; }
+install() { which instscript>&/dev/null && instscript --zip --pdf --markdown $myname; exit; }
 
 Nor='\e[0m'    # reset color	]
 Err='\e[31;1m' # light red	]
