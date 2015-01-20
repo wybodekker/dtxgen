@@ -4,7 +4,7 @@
    type:| bash
  author:| Wybo Dekker
   email:| wybo@dekkerdocumenten.nl
-version:| 1.04
+version:| 1.05
 license:| Released under the GNU General Public License
 
 dtxgen creates a template for a self-extracting .dtx file, based on the model described by
@@ -12,7 +12,7 @@ U{www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}. It is useful for
 those who plan to create a new Documented LaTeX Source (.dtx) file.
 
 Recent changes:
-Changes with respect version 1.03:
-- Clearer comments
-- scripts' README information incorporated in the documentation.
+Changes with respect version 1.04:
+- mktemp now works for Mac/BSD too
+- don't include .cls/.sty file in zip
 
