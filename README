@@ -5,9 +5,9 @@
  author:| Wybo Dekker
   email:| wybo@dekkerdocumenten.nl
 version:| 1.07
-license:| Released under the GNU General Public License
+license:| GNU General Public License
 
 dtxgen creates a template for a self-extracting .dtx file, based on the model described by
-U{www.texdev.net/2009/10/06/a-model-dtx-file/}{Joseph Wright}. It is useful for
+[Joseph Wright](www.texdev.net/2009/10/06/a-model-dtx-file/). It is useful for
 those who plan to create a new Documented LaTeX Source (.dtx) file.
 
