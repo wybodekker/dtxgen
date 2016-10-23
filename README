@@ -4,7 +4,7 @@
    type:| bash
  author:| Wybo Dekker
   email:| wybo@dekkerdocumenten.nl
-version:| 1.07
+version:| 1.08
 license:| GNU General Public License
 
 dtxgen creates a template for a self-extracting .dtx file, based on the model described by

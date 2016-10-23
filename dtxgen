@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Version=1.07
+Version=1.08
 Myname="${0##*/}"
 
 <<'DOC'
@@ -101,8 +101,6 @@ zip		produce a zip file ready for upload to CTAN
 Released under the [GNU General Public License](www.gnu.org/copyleft/gpl.html)
 DOC
 
-
-
 # using the label in arg 2, read template from my self, filter it
 # through the script in arg 1, and write the output to the file in arg 3.
 # The default for arg 3 is arg 2
@@ -110,6 +108,13 @@ function createfile {
    file=$3
    test "$file" = "" && file=$2
    sed -n "/^<<'$2'/,/^$2/p" "$0" |tail -n +2 |head -n -1 |sed "$1" >"$file"
+}
+
+test "$(type -t helpsrt)" = builtin || source wdbashfunctions 2>/dev/null || {
+   echo -e "${0##*/} needs wdbashfunctions\n" \
+        "get those with: wget http://www.dekkerdocumenten.nl/unix/wdbashfunctions,\n" \
+        "and put the script in your PATH or source it in your ~/.bashrc"
+   exit 1
 }
 
 if ! options=$(getopt \
