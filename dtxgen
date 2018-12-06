@@ -3,7 +3,7 @@
 Version=1.08
 Myname="${0##*/}"
 
-<<'DOC'
+:<<'DOC'
 = dtxgen - generate template for LaTeX self-extracting .dtx file
 
 = Synopsis
@@ -15,8 +15,8 @@ dtxgen [options] basename.[sty,cls]
 -V,--version	print version and exit
 -s,--short	short, one-liner, package description
 -d,--date	initial version's date. Default: current date 
--m,--mail	your email address. Default: $MAIL
--n,--name	your name. Default: $NAME
+-m,--mail	your email address. Default: |$MAIL|
+-n,--name	your name. Default: |$NAME|
 -c,--class	(class packs only) class to be preloaded. Default: article
 -q,--quiet	run quietly
 
@@ -107,15 +107,19 @@ DOC
 function createfile {
    file=$3
    test "$file" = "" && file=$2
-   sed -n "/^<<'$2'/,/^$2/p" "$0" |tail -n +2 |head -n -1 |sed "$1" >"$file"
+   sed -n "/^:<<'$2'/,/^$2/p" "$0" |tail -n +2 |head -n -1 |sed "$1" >"$file"
 }
 
-test "$(type -t helpsrt)" = function || source wdbashfunctions 2>/dev/null || {
-   echo -e "${0##*/} needs wdbashfunctions\n" \
-        "get those with: wget http://www.dekkerdocumenten.nl/unix/wdbashfunctions,\n" \
-        "and put the script in your PATH or source it in your ~/.bashrc"
-   exit 1
-}
+REd='\e[38;5;9m'
+    die() { local i; for i; do echo -e "$Myname: $REd$i"; done 1>&2; exit 1; }
+helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; }
+instscr() { instscript --zip --pdf "$Myname"; exit; }
+
+# shellcheck disable=SC2154
+helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed -n '1d;$d;p'|
+            less -Ps"$Myname-${Version/./·} documentation - type h for help, q to quit."
+		exit
+	  }
 
 if ! options=$(getopt \
    -n "$Myname" \
@@ -244,7 +248,7 @@ make $quiet
 exit 0
 
 # ---- TEMPLATES: ----
-<<'Makefile'
+:<<'Makefile'
 NAME  = %base%
 SHELL = bash
 PWD   = $(shell pwd)
@@ -279,7 +283,7 @@ zip: all
 	rm $(NAME)
 Makefile
 
-<<'DTX'
+:<<'DTX'
 % \iffalse meta-comment
 % vim: textwidth=75
 %<*internal>
