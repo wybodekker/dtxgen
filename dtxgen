@@ -121,7 +121,6 @@ function createfile {
 REd='\e[38;5;9m'
     die() { local i; for i; do echo -e "$Myname: $REd$i"; done 1>&2; exit 1; }
 helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; }
-instscr() { instscript --zip --pdf "$Myname"; exit; }
 
 # shellcheck disable=SC2154
 helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed -n '1d;$d;p'|
@@ -172,7 +171,9 @@ while [ $# -gt 0 ]; do
                   quiet=--quiet
                   shift
                   ;;
-   (-I)           instscr
+   (-I)		  instscript "$0" ||
+		     die 'the -I option is for developers only'
+		  exit
                   ;;
    (--)           shift
                   break
