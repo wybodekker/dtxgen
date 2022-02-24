@@ -104,10 +104,8 @@ DOC
 REd='\e[38;5;9m' Nor='\e[0m'
     die() { local i; for i; do echo -e "$Myname: $REd$i$Nor"; done 1>&2; exit 1; }
 helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; }
-helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed -n '1d;$d;p'|
-            less -Ps"$Myname-${Version/./·} documentation - type h for help, q to quit."
-		exit
-	  }
+helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed '1d;$d'|
+            less -P"$Myname-${Version/./·} (press h for help, q to quit)";exit; }
 
 :<<'DOC' #---------------------------------------------------------------------
 = excheck
@@ -139,7 +137,7 @@ function createfile {
 
 :<<'DOC' #----------------------------------------------------------------------
 = handle_options
-synopsis:	 handle_options "$@" || set "${args[@]}"
+synopsis:	 handle_options "$@"
 description:	handle the options.
 globals used:	 Myname Version
 globals  set:	 args
