@@ -18,6 +18,7 @@ dtxgen [options] basename.[sty,cls]
 -m,--mail	your email address. Default: |$EMAIL|
 -n,--name	your name. Default: |$NAME|
 -c,--class	(class packs only) class to be preloaded. Default: article
+-f,--format	latex format to be used for compilation. Default: pdflatex
 -q,--quiet	run quietly
 
 = Description
@@ -73,6 +74,9 @@ dtxgen recognizes the following options:
 	Set the initial version's date. By default, the current date will
 	be used.  The date should be entered in the |yyyymmdd| format,
 	although it will be stored the LaTeX way: |yyyy/mm/dd|.
+-f,--format=...
+	Latex format to be used for compilation. The default is pdflatex,
+	but you may need another format, like xelatex of lualatex.
 -q,--quiet	
 	Run quietly
 -V,--version	
@@ -148,8 +152,8 @@ handle_options() {
    local options
    if ! options=$(getopt \
       -n "$Myname" \
-      -o s:n:m:c:d:hHVqI \
-      -l short:,name:,mail:,class:,date:,help,Help,version,quiet -- "$@"
+      -o s:n:m:c:d:hHVf:qI \
+      -l short:,name:,mail:,class:,date:,help,Help,version,quiet,format: -- "$@"
    ); then exit 1; fi
    eval set -- "$options"
    
@@ -185,11 +189,15 @@ handle_options() {
                      loadclass=$2
                      shift 2
                      ;;
+      (-f|--format)  # latex format to be used for compilation. Default: pdflatex
+		     format=$2
+		     shift 2
+		     ;;
       (-q|--quiet)   # run quietly
                      quiet=--quiet
                      shift
                      ;;
-      (-I)	     instscript "$0" ||
+      (-I)	     instscript "$Myname" ||
    		        die 'the -I option is for developers only'
    		     exit
                      ;;
@@ -217,6 +225,7 @@ mail=${mail:-${EMAIL:-(not set)}}
 date=${date:-$(date +%Y%m%d)}
 year=${date:0:4}
 loadclass=${loadclass:-article}
+format=${format:-pdflatex}
 
 # date must be 8 digits; insert the two /'s:
 if [[ ! $date =~ ^[[:digit:]]{8}$ ]]; then die "illegal date"; fi
@@ -269,7 +278,7 @@ done
 
 # make sed script replacing the variables in the templates:
 sedscript=''
-for i in base year ext mail use typ Typ name date short shrt lcl readme; do
+for i in base format year ext mail use typ Typ name date short shrt lcl readme; do
   test $quiet || eval "echo -e \"$i	\$$i\""|sed 's/\\\\/\\/g'
   eval "sedscript+=\"s=%$i%=\$$i=g;\""
 done
@@ -284,17 +293,18 @@ exit 0
 NAME  = %base%
 SHELL = bash
 PWD   = $(shell pwd)
+FORMAT= %format%
 VERS  = $(shell ltxfileinfo -v $(NAME).dtx|sed -e 's/^v//')
 LOCAL = $(shell kpsewhich --var-value TEXMFLOCAL)
 UTREE = $(shell kpsewhich --var-value TEXMFHOME)
 all:	$(NAME).pdf
 	test -e README.txt && mv README.txt README || exit 0
 $(NAME).pdf: $(NAME).dtx
-	pdflatex -shell-escape -recorder -interaction=batchmode $(NAME).dtx >/dev/null
+	$(FORMAT) -shell-escape -recorder -interaction=batchmode $(NAME).dtx >/dev/null
 	if [ -f $(NAME).glo ]; then makeindex -q -s gglo.ist -o $(NAME).gls $(NAME).glo; fi
 	if [ -f $(NAME).idx ]; then makeindex -q -s gind.ist -o $(NAME).ind $(NAME).idx; fi
-	pdflatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
-	pdflatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
+	$(FORMAT) --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
+	$(FORMAT) --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
 clean:
 	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out}
 distclean: clean
