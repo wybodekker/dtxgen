@@ -101,13 +101,32 @@ zip		produce a zip file ready for upload to CTAN
 Released under the [GNU General Public License](www.gnu.org/copyleft/gpl.html)
 DOC
 
-# check executables and versions of bash and getopt
-((BASH_VERSINFO>=4)) || die "Need bash version >= 4"
-for i in getopt make; do
-   command -v "$i" &> /dev/null || die "$i: command not found"
-done
-i=$(getopt -T)
-{ (($?==4)) && [[ -z $i ]]; } || die "Your getopt is not GNU"
+REd='\e[38;5;9m' Nor='\e[0m'
+    die() { local i; for i; do echo -e "$Myname: $REd$i$Nor"; done 1>&2; exit 1; }
+helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; }
+helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed -n '1d;$d;p'|
+            less -Ps"$Myname-${Version/./·} documentation - type h for help, q to quit."
+		exit
+	  }
+
+:<<'DOC' #---------------------------------------------------------------------
+= excheck
+synopsis:	 excheck executable1 [executable2...]
+description:	check if all needed execs are there and getopt is GNU
+DOC
+#-------------------------------------------------------------------------------
+excheck() {
+   local ok=true i
+   ((BASH_VERSINFO>=4)) || die "Need bash version >= 4"
+   for i; do 
+      command -v "$i" > /dev/null && continue
+      Warn "Missing executable: $i"
+      ok=false
+   done
+   $ok || die
+   getopt -T 
+   (( $? == 4 )) || die "Your getopt is not GNU"
+}
 
 # using the label in arg 2, read template from my self, filter it
 # through the script in arg 1, and write the output to the file in arg 3.
@@ -118,72 +137,82 @@ function createfile {
    sed -n "/^:<<'$2'/,/^$2/p" "$0" |tail -n +2 |head -n -1 |sed "$1" >"$file"
 }
 
-REd='\e[38;5;9m'
-    die() { local i; for i; do echo -e "$Myname: $REd$i"; done 1>&2; exit 1; }
-helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; }
+:<<'DOC' #----------------------------------------------------------------------
+= handle_options
+synopsis:	 handle_options "$@" || set "${args[@]}"
+description:	handle the options.
+globals used:	 Myname Version
+globals  set:	 args
+returnsL	the number of remaining arguments
+DOC
+#-------------------------------------------------------------------------------
+handle_options() {
+   local options
+   if ! options=$(getopt \
+      -n "$Myname" \
+      -o s:n:m:c:d:hHVqI \
+      -l short:,name:,mail:,class:,date:,help,Help,version,quiet -- "$@"
+   ); then exit 1; fi
+   eval set -- "$options"
+   
+   while [ $# -gt 0 ]; do
+      case $1 in
+      (-h|--help)    # print short help and exit
+                     helpsrt
+                     ;;
+      (-H|--Help)    # print full documentation via less and exit
+                     helpall
+                     ;;      
+      (-V|--version) # print version and exit
+                     echo $Version
+   		     exit
+                     ;;
+      (-s|--short)   # short, one-liner, package description
+                     short=$2
+                     shift 2
+                     ;;
+      (-d|--date)    # initial version's date. Default: current date 
+                     date=$2
+                     shift 2
+                     ;;
+      (-m|--mail)    # your email address. Default: $EMAIL
+                     mail=$2
+                     shift 2
+                     ;;
+      (-n|--name)    # your name. Default: $NAME
+                     name=$2
+                     shift 2
+                     ;;
+      (-c|--class)   # (class packs only) class to be preloaded. Default: article
+                     loadclass=$2
+                     shift 2
+                     ;;
+      (-q|--quiet)   # run quietly
+                     quiet=--quiet
+                     shift
+                     ;;
+      (-I)	     instscript "$0" ||
+   		        die 'the -I option is for developers only'
+   		     exit
+                     ;;
+      (--)           shift
+                     break
+                     ;;
+      (*)            break
+                     ;;
+      esac
+   done
+   args=( "$@" )
+   return ${#args}
+}
 
-# shellcheck disable=SC2154
-helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed -n '1d;$d;p'|
-            less -Ps"$Myname-${Version/./·} documentation - type h for help, q to quit."
-		exit
-	  }
+excheck make getopt pdflatex makeindex zip ltxfileinfo kpsewhich
 
-if ! options=$(getopt \
-   -n "$Myname" \
-   -o s:n:m:c:d:hHVqI \
-   -l short:,name:,mail:,class:,date:,help,Help,version,quiet -- "$@"
-); then exit 1; fi
-eval set -- "$options"
+handle_options "$@" || set "${args[@]}"
 
-while [ $# -gt 0 ]; do
-   case $1 in
-   (-h|--help)    # print short help and exit
-                  helpsrt
-                  ;;
-   (-H|--Help)    # print full documentation via less and exit
-                  helpall
-                  ;;      
-   (-V|--version) # print version and exit
-                  echo $Version
-		  exit
-                  ;;
-   (-s|--short)   # short, one-liner, package description
-                  short=$2
-                  shift 2
-                  ;;
-   (-d|--date)    # initial version's date. Default: current date 
-                  date=$2
-                  shift 2
-                  ;;
-   (-m|--mail)    # your email address. Default: $EMAIL
-                  mail=$2
-                  shift 2
-                  ;;
-   (-n|--name)    # your name. Default: $NAME
-                  name=$2
-                  shift 2
-                  ;;
-   (-c|--class)   # (class packs only) class to be preloaded. Default: article
-                  loadclass=$2
-                  shift 2
-                  ;;
-   (-q|--quiet)   # run quietly
-                  quiet=--quiet
-                  shift
-                  ;;
-   (-I)		  instscript "$0" ||
-		     die 'the -I option is for developers only'
-		  exit
-                  ;;
-   (--)           shift
-                  break
-                  ;;
-   (*)            break
-                  ;;
-   esac
-done
+test $# == 1 || die "I need 1 argument"
 
-export year typ Typ lcl use # used in templates - shellcheck se them as unused
+export year typ Typ lcl use # used in templates - shellcheck sees them as unused
 
 name=${name:-${NAME:-(not set)}}
 mail=${mail:-${EMAIL:-(not set)}}
@@ -237,7 +266,7 @@ declare -A rm=(
 )
 
 for i in $kopl $base Author E-mail License See; do
-  readme+="$(printf "%*s:| %s\\\\n"  $colw "$i" "${rm[$i]}")"
+  readme+="$(printf "%*s:| %s\\\\n" "$colw" "$i" "${rm[$i]}")"
 done
 
 # make sed script replacing the variables in the templates:
