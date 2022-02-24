@@ -203,12 +203,12 @@ handle_options() {
       esac
    done
    args=( "$@" )
-   return ${#args}
 }
 
 excheck make getopt pdflatex makeindex zip ltxfileinfo kpsewhich
 
-handle_options "$@" || set "${args[@]}"
+handle_options "$@"
+set -- "${args[@]}"
 
 test $# == 1 || die "I need 1 argument"
 
