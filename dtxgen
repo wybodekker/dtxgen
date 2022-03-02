@@ -71,6 +71,8 @@ dtxgen recognizes the following options:
 	For class templates only: inserts a |\LoadClass{...}|, so that the
 	new class will start with the properties of the |...| class.
 	The default is |article|.
+-v,--version=...		
+	Set the initial version; by default 1.00 wil be used.
 -d,--date=...	
 	Set the initial version's date. By default, the current date will
 	be used.  The date should be entered in the |yyyymmdd| format,
@@ -91,11 +93,11 @@ dtxgen recognizes the following options:
 The |Makefile| can be used to compile new versions of your work; it
 contains the following targets:
 
-all		(the default) generate the style or class file, the pdf-documentation,
-		and a README.md file.
+all		(the default) generate the style or class file,
+		the pdf-documentation, and a README.md file.
 distclean	remove all files that can be regenerated,
-clean		same, except the style or class file, the pdf-documentation,
-		and a README.md file.
+clean		same, except the style or class file, the
+		pdf-documentation, and a README.md file.
 inst		install in the user's TeX tree,
 install		install in the local TeX tree (uses sudo)
 zip		produce a zip file ready for upload to CTAN
@@ -145,8 +147,8 @@ handle_options() {
    local options
    if ! options=$(getopt \
       -n "$Myname" \
-      -o s:n:m:b:c:d:hHVf:qI \
-      -l short:,name:,mail:,body:,class:,date:,help,Help,version,quiet,format: -- "$@"
+      -o s:n:m:b:c:d:v:hHVf:qI \
+      -l short:,name:,mail:,body:,class:,date:,version:,help,Help,version,quiet,format: -- "$@"
    ); then exit 1; fi
    eval set -- "$options"
    
@@ -164,6 +166,10 @@ handle_options() {
                      ;;
       (-s|--short)   # short, one-liner, package description
                      short=$2
+                     shift 2
+                     ;;
+      (-v|--version) # initial version. Default: 1.00
+		     version=$2
                      shift 2
                      ;;
       (-d|--date)    # initial version's date. Default: current date 
@@ -238,6 +244,7 @@ esac
 : "${name:=${NAME:-(not set)}}"		# default name is envvar NAME
 : "${mail:=${EMAIL:-(not set)}}"	# default email is envvar MAIL
 : "${date:=$(date +%Y%m%d)}"		# default date is now
+: "${version:=1.00}"			# default version is 1.00
 : "${loadclass:=article}"		# default class to load is article
 : "${format:=pdflatex}"			# default formatter is pdflatex
 
@@ -257,7 +264,7 @@ test -z "$mail" && die "author's email not set - use option or environment varia
 test -z "$name" && die "author's name not set - use option or environment variable NAME"
 
 export abst body desc base format ext year mail use typ Typ name date
-export short shrt lcl makefile readme
+export short shrt lcl makefile readme version
 
 if [[ -z $body ]]; then
    # if no existing style/class file was given, use the demo one:
@@ -273,7 +280,7 @@ else
 	/^\\Provides/{N;N;s/\\Provides.*{.*}%*\s\+\[.*\]//;}
 	/^%%/d
 	/^\\NeedsTeXFormat/d
-	/^\\endinput
+	/^\\endinput/d
    ' "$body")"
    abst="% Put your abstract here"
    desc="% Put your descriptive text here"
@@ -283,17 +290,23 @@ readme="$(sed -n "/^:<<'README'/,/^README/{/README/!p}" "$0" |envsubst)"
 
 sed -n "/^:<<'DTX'/,/^DTX/{/DTX/!p}" "$0" |envsubst >"$base".dtx
 
-eval "luatex '$base.dtx' $redir" ||
+eval "luatex -interaction=batchmode '$base.dtx' $redir" ||
    die "Error running 'luatex $base.dtx'" 'see log(s)'
 
 make -f Makefile. $quiet || die 'Error running make'
 make $quiet clean
 cat <<-EOD
+	
 	You have 5 new files now:
 	1. $base.dtx: this is the only file you need to keep and edit.
 	   The other files can be generated from it with:
 	   luatex $base.dtx; make -f Makefile.; make clean
-	2. Makefile: 
+	2. Makefile: can be used to recreate everything after an edit
+	   of $base.dtx and to install and clean up. See the README
+	   file and the dtxgen documentation.
+	3. The README.md file.
+	4. $base.$ext: the $Typ file.
+	5. $base.pdf: the documentation.
 EOD
 exit 0
 # ---- TEMPLATES: ----
@@ -357,10 +370,10 @@ $(NAME).pdf: $(NAME).dtx
 	$(FORMAT) -shell-escape -recorder -interaction=batchmode $(NAME).dtx >/dev/null
 	if [ -f $(NAME).glo ]; then makeindex -q -s gglo.ist -o $(NAME).gls $(NAME).glo; fi
 	if [ -f $(NAME).idx ]; then makeindex -q -s gind.ist -o $(NAME).ind $(NAME).idx; fi
-	$(FORMAT) --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
-	$(FORMAT) --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
+	$(FORMAT) --recorder --interaction=batchmode $(NAME).dtx > /dev/null
+	$(FORMAT) --recorder --interaction=batchmode $(NAME).dtx > /dev/null
 clean:
-	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out} Makefile. BODY
+	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out,toc} Makefile.
 distclean: clean
 	rm -f $(NAME).{pdf,$ext} README.md Makefile
 inst: all
@@ -380,12 +393,15 @@ zip: all
 MAKE
 
 :<<'README'
----------|----------------------------------------------------------------
-  $base: | $shrt
- Author: | $name
- E-mail: | $mail
-License: | Released under the LaTeX Project Public License v1.3c or later
-    See: | http://www.latex-project.org/lppl.txt
+# $base
+     key | description
+     ---:|:---
+   $base | $shrt
+ version | $version
+    date | $date 
+  author | $name
+   email | $mail
+ license | Released under the LaTeX Project Public License v1.3c or later
 
 Short description:
 Some text about the $typ: probably the same as the abstract.
@@ -419,7 +435,6 @@ README
 \iffalse
 %</internal>
 %<*readme>
-|
 $readme
 %</readme>
 %<*makefile>
@@ -460,11 +475,11 @@ $makefile
 %<$typ>\NeedsTeXFormat{LaTeX2e}[2021/11/15]
 %<$typ>\Provides$Typ{$base}
 %<*$typ>
-    [$date v1.00 $shrt]
+    [$date v$version $shrt]
 %</$typ>
 %<*driver>
 \documentclass{ltxdoc}
-\usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
+\usepackage[a4paper,margin=20mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
 $use
 \EnableCrossrefs
@@ -490,6 +505,7 @@ $use
 % \begin{abstract}
 $abst
 % \end{abstract}
+% \tableofcontents
 %
 % \section{Usage}
 $desc
