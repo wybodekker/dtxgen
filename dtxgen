@@ -117,7 +117,7 @@ install		install in the local TeX tree (uses sudo)
 zip		produce a zip file ready for upload to CTAN
 
 = Author
-[Wybo Dekker](wybo@dekkerdocumenten.nl)
+[Wybo Dekker](wybodekker@me.com)
 
 = Copyright
 Released under the [GNU General Public License](www.gnu.org/copyleft/gpl.html)
@@ -485,7 +485,7 @@ README
 :<<'DTX'
 % \iffalse meta-comment
 %
-% Copyright (C) 2021 by Wybo Dekker <wybo@dekkerdocumenten.nl>
+% Copyright (C) 2021 by Wybo Dekker <wybodekker@me.com>
 %
 % This work may be distributed and/or modified under the
 % conditions of the LaTeX Project Public License (LPPL), either
