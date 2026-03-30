@@ -1,5 +1,5 @@
 #!/bin/bash
-Version=1.09
+Version=1.10
 Myname="${0##*/}"
 
 :<<'DOC'
@@ -59,7 +59,7 @@ NAME and EMAIL, you could simply type:
 and you would end up with five files: |myclass.dtx|, |myclass.cls|,
 |myclass.pdf|, |README.md|, and |Makefile|.
 
-= Options
+= Options - more elaborately explained
 dtxgen recognizes the following options:
 
 -h,--help	
@@ -68,31 +68,30 @@ dtxgen recognizes the following options:
 	print full documentation via less and exit
 -V	
 	Prints the script's version and exits.
--s,--short=X
+-s,--short=X	
 	A short, one-liner, description for the class or package.
 	By default, the string /A new LaTeX class/ or /A new LaTeX package/
 	will be used.
--n,--name=X
+-n,--name=X	
 	Your name (first name, followed by surname). Alternatively,
 	you can set a default value in the environment variable |NAME|;
 	if you do so and still use this option, the option's value wills
 	have priority.
--m,--mail=X
+-m,--mail=X	
 	Your email address. Alternatively, you can set a default value ins
 	the environment variable |EMAIL|; if you do so and still use this
 	option, the option's value will have priority.
--c,--class=X
+-c,--class=X	
 	For class templates only: inserts a |\LoadClass{...}|, so that the
 	new class will start with the properties of the |...| class.
 	The default is |article|.
--v,--version=X
+-v,--version=X	
 	Set the initial version; by default 1.00 wil be used.
--d,--date=X
+-d,--date=X	
 	Set the initial version's date. By default, the current date will
 	be used.  The date should be entered in the |yyyymmdd| format,
 	although it will be stored the LaTeX way: |yyyy/mm/dd|.
-
--f,--format=X
+-f,--format=X	
 	Latex format to be used for compilation. The default is pdflatex,
 	but you may need another format, like xelatex of lualatex.
 -i,--history	
@@ -123,12 +122,22 @@ zip		produce a zip file ready for upload to CTAN
 Released under the [GNU General Public License](www.gnu.org/copyleft/gpl.html)
 DOC
 
-REd='\e[38;5;1m' Mag='\e[38;5;5m' Nor='\e[0m'
-    die() { local i; for i; do echo -e "$Myname: $REd$i$Nor"; done 1>&2; exit 1; }
-   Warn() { local i; for i; do echo -e "$Myname: $Mag$i$Nor"; done 1>&2; }
-helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; }
-helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed '1d;$d'|
-            less -P"$Myname-${Version/./·} (press h for help, q to quit)";exit; }
+# --- colors ---------------------------------------------------------------
+Red='' Mag='' Nor='' nv="$Myname-${Version/./\\.} (press h for help, q to quit)"
+[ -t 1 ] && command -v tput >/dev/null && (( $(tput colors) >= 8 )) && { 
+  Red=$(tput bold && tput setaf 1) 
+  Mag=$(tput bold && tput setaf 5) 
+  Nor=$(tput sgr0)
+} 
+
+# --- utils ----------------------------------------------------------------
+    die() { local i; for i; do echo -e "$Myname: $Red$i$Nor"; done >&2; exit 1; } 
+   Warn() { local i; for i; do echo -e "$Myname: $Mag$i$Nor"; done >&2; } 
+   warn() { $verbose && Warn "$@"; }
+
+# --- help from embedded doc ----------------------------------------------
+helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; } 
+helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed '1d;$d'| less -P"$nv"; exit; }
 
 :<<'DOC' #---------------------------------------------------------------------
 = excheck
