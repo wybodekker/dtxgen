@@ -2,13 +2,14 @@
 Version=1.10
 Myname="${0##*/}"
 
-:<<'DOC'
+doc=$(cat \
+<<'DOC'
 = dtxgen - generate template for LaTeX self-extracting .dtx file
 
 = Synopsis
 dtxgen [options] basename.[sty,cls]	
 
-== Options
+= Options
 
 -h,--help	print short help and exit
 -H,--Help	print full documentation via less and exit
@@ -121,23 +122,15 @@ zip		produce a zip file ready for upload to CTAN
 = Copyright
 Released under the [GNU General Public License](www.gnu.org/copyleft/gpl.html)
 DOC
+)
 
-# --- colors ---------------------------------------------------------------
-Red='' Mag='' Nor='' nv="$Myname-${Version/./\\.} (press h for help, q to quit)"
-[ -t 1 ] && command -v tput >/dev/null && (( $(tput colors) >= 8 )) && { 
-  Red=$(tput bold && tput setaf 1) 
-  Mag=$(tput bold && tput setaf 5) 
-  Nor=$(tput sgr0)
-} 
-
-# --- utils ----------------------------------------------------------------
-    die() { local i; for i; do echo -e "$Myname: $Red$i$Nor"; done >&2; exit 1; } 
-   Warn() { local i; for i; do echo -e "$Myname: $Mag$i$Nor"; done >&2; } 
-   warn() { $verbose && Warn "$@"; }
-
-# --- help from embedded doc ----------------------------------------------
-helpsrt() { sed -n '/^= Synopsis/,/^= /p' "$0"|sed '1d;$d'; exit; } 
-helpall() { sed -n "/^:<<'DOC'$/,/^DOC/p" "$0"|sed '1d;$d'| less -P"$nv"; exit; }
+# --- colors, help from embedded doc, die and warn ---------------------------------
+[ -t 1 ] && { Red=$'\e[1;31m' Mag=$'\e[1;35m' Nor=$'\e[0m'; } || Red='' Mag='' Nor=''
+nv="-$Myname-${Version/./\\.} (press h for help, q to quit)"
+helpsrt() { sed -n '/^= Synopsis/,/^= Desc/{//d;p}' <<<"$doc"; exit; }
+helpall() { less -P"$nv" <<<"$doc"; exit; }
+    die() { printf "%s$Nor\n" "${@/#/$Myname: $Red}" >&2; exit 1; }
+   Warn() { printf "%s$Nor\n" "${@/#/$Myname: $Mag}" >&2; }
 
 :<<'DOC' #---------------------------------------------------------------------
 = excheck
@@ -332,7 +325,7 @@ if [[ -z $body ]]; then
    desc="$(sed -n "/^:<<'DESC'/,/^DESC/{/DESC/!p}" "$0")"
    abst="% This is a demo $Typ file"
 else
-   body=${body%.$ext}.$ext
+   body=${body%."$ext"}.$ext
    body="$(kpsewhich "$body")"
    [[ -z $body ]] && die "kpsewhich could not find $body"
    # remove any \Provides..., \NeedsTeXFormat, \endinput and %%-comments
@@ -371,7 +364,9 @@ cat <<-EOD
 	5. A Makefile:
 EOD
 make help
-exit 0
+exit
+
+# shellcheck disable=SC2317
 # ---- TEMPLATES: ----
 :<<'DESC'
 % \DescribeMacro{\dummyMacro}
@@ -387,6 +382,7 @@ exit 0
 % mandatory and optional arguments are, and so forth.
 DESC
 
+# shellcheck disable=SC2317
 :<<'BODY'
 %    \end{macrocode}
 % \begin{macro}{\dummyMacro}
@@ -417,6 +413,7 @@ $ch2
 %    \begin{macrocode}
 BODY
 
+# shellcheck disable=SC2317
 :<<'MAKEF'
 SHELL = bash
 BASE  = $base
@@ -465,6 +462,7 @@ help:	# show this help #
 	@echo "Note:       Never use sudo!"
 MAKEF
 
+# shellcheck disable=SC2317
 :<<'README'
 # $base
      key | description
@@ -491,6 +489,7 @@ This is a self-extracting file. Install as follows:
 6. Try "make help"
 README
 
+# shellcheck disable=SC2317
 :<<'DTX'
 % \iffalse meta-comment
 %
